@@ -1,0 +1,393 @@
+@import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --paper:     #f2e8d5;
+  --paper-dark:#e8d9bc;
+  --ink:       #1a1208;
+  --ink-faded: #5a4a32;
+  --rust:      #7a3b1e;
+  --rule:      #c4a97a;
+  --rule-thin: #d4bc94;
+}
+
+body { background: var(--paper); color: var(--ink); }
+
+/* Grain texture overlay */
+.hp-root {
+  font-family: 'IM Fell English', serif;
+  background: var(--paper);
+  min-height: 100vh;
+  position: relative;
+}
+.hp-root::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+.hp-root > * { position: relative; z-index: 1; }
+
+/* MASTHEAD */
+.hp-masthead {
+  text-align: center;
+  padding: 2rem 2rem 0;
+  border-bottom: 3px double var(--rule);
+}
+.hp-masthead-date {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-faded);
+  margin-bottom: 0.5rem;
+}
+.hp-masthead-title {
+  font-family: 'UnifrakturMaguntia', cursive;
+  font-size: clamp(3rem, 8vw, 6.5rem);
+  line-height: 1;
+  color: var(--ink);
+  letter-spacing: 0.01em;
+}
+.hp-masthead-rule {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 0.6rem 0;
+  color: var(--rule);
+}
+.hp-masthead-rule::before,
+.hp-masthead-rule::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+}
+.hp-masthead-tagline {
+  font-family: 'IM Fell English SC', serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.22em;
+  color: var(--ink-faded);
+  text-transform: uppercase;
+}
+.hp-masthead-ornament {
+  font-size: 1.1rem;
+  color: var(--rust);
+}
+.hp-masthead-nav {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  margin-top: 0.8rem;
+  border-top: 1px solid var(--rule-thin);
+  border-bottom: 1px solid var(--rule-thin);
+  padding: 0.4rem 0;
+}
+.hp-masthead-nav a {
+  font-family: 'IM Fell English SC', serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ink-faded);
+  padding: 0.15rem 1.2rem;
+  border-right: 1px solid var(--rule-thin);
+  transition: color 0.2s;
+}
+.hp-masthead-nav a:first-child { border-left: 1px solid var(--rule-thin); }
+
+/* HERO / LEAD STORY */
+.hp-hero {
+  display: grid;
+  grid-template-columns: 1fr 2px 1.4fr;
+  gap: 0;
+  padding: 1.5rem 2rem;
+  border-bottom: 2px solid var(--rule);
+}
+.hp-hero-col-rule {
+  background: var(--rule-thin);
+  margin: 0 1.5rem;
+}
+.hp-hero-kicker {
+  margin-left: 0.4rem;
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--rust);
+  margin-bottom: 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hp-hero-headline {
+  font-family: 'IM Fell English', serif;
+  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  margin-bottom: 1rem;
+}
+.hp-hero-headline em { font-style: italic; color: var(--rust); }
+.hp-hero-byline {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  color: var(--ink-faded);
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--rule-thin);
+}
+.hp-hero-desc {
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: var(--ink-faded);
+  text-align: justify;
+  hyphens: auto;
+}
+.hp-hero-img-wrap {
+  position: relative;
+}
+.hp-hero-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: sepia(30%) contrast(1.05);
+}
+.hp-hero-img-caption {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.62rem;
+  color: var(--ink-faded);
+  letter-spacing: 0.06em;
+  padding: 0.4rem 0 0;
+  border-top: 1px solid var(--rule-thin);
+  margin-top: 0.4rem;
+  font-style: italic;
+}
+
+/* SECTION RULE */
+.hp-section-rule {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.8rem 2rem;
+  background: var(--ink);
+  color: var(--paper);
+}
+.hp-section-rule-title {
+  font-family: 'IM Fell English SC', serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.hp-section-rule-line {
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+  opacity: 0.4;
+}
+.hp-section-rule-count {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  opacity: 0.6;
+}
+
+/* GRID */
+.hp-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  border-left: 1px solid var(--rule-thin);
+}
+.hp-card {
+  border-right: 1px solid var(--rule-thin);
+  border-bottom: 1px solid var(--rule-thin);
+  cursor: pointer;
+  background: var(--paper);
+  transition: background 0.2s;
+}
+
+.hp-card-img-wrap {
+  overflow: hidden;
+  width: 100%;
+}
+.hp-card-img-wrap img {
+  width: 100%;
+  height: auto;
+  object-fit: unset;
+  display: block;
+}
+
+
+.hp-card-info { padding: 1rem 1.2rem 1.3rem; }
+.hp-card-tag {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--rust);
+  margin-bottom: 0.4rem;
+}
+.hp-card-title {
+  font-family: 'IM Fell English', serif;
+  font-size: 1.15rem;
+  line-height: 1.25;
+  color: var(--ink);
+  margin-bottom: 0.5rem;
+}
+.hp-card-excerpt {
+  font-size: 0.8rem;
+  line-height: 1.6;
+  color: var(--ink-faded);
+  text-align: justify;
+  hyphens: auto;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.hp-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 1.2rem 0.8rem;
+  border-top: 1px solid var(--rule-thin);
+}
+.hp-card-date {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.6rem;
+  color: var(--ink-faded);
+  letter-spacing: 0.06em;
+}
+.hp-card-read {
+  font-family: 'IM Fell English SC', serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--rust);
+  text-decoration: none;
+}
+
+/* FOOTER */
+.hp-footer {
+  border-top: 3px double var(--rule);
+  padding: 1.5rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.hp-footer-copy {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.62rem;
+  color: var(--ink-faded);
+  letter-spacing: 0.08em;
+}
+.hp-footer-logo {
+  font-family: 'UnifrakturMaguntia', cursive;
+  font-size: 1.4rem;
+  color: var(--ink);
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .hp-hero { grid-template-columns: 1fr; }
+  .hp-hero-col-rule { display: none; }
+  .hp-masthead-title { font-size: 3rem; }
+}
+@media (max-width: 560px) {
+  .hp-masthead-nav a { padding: 0.15rem 0.6rem; font-size: 0.62rem; }
+}
+
+.hp-card-img-wrap img + img {
+  padding-top: 3rem;
+}
+
+.hp-picker-wrap {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 1.2rem 2rem;
+  border-bottom: 1px solid var(--rule-thin);
+}
+
+.hp-picker-label {
+  font-family: 'IM Fell English SC', serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faded);
+  white-space: nowrap;
+}
+
+.hp-picker-select {
+  font-family: 'IM Fell English', serif;
+  font-size: 1rem;
+  background: var(--paper);
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  padding: 0.4rem 1rem;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235a4a32' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.8rem center;
+  padding-right: 2.5rem;
+}
+
+.hp-picker-select:focus {
+  outline: none;
+  border-color: var(--rust);
+}
+
+.hp-publication {
+  max-width: 960px;
+  margin: 2rem auto;
+  padding: 0 2rem;
+}
+
+.hp-publication-title {
+  font-family: 'IM Fell English', serif;
+  font-size: 1.6rem;
+  letter-spacing: -0.01em;
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid var(--rule-thin);
+  color: var(--ink);
+}
+
+.hp-masthead-deco {
+  color: var(--rust) !important;
+  cursor: pointer;
+}
+.hp-masthead-deco:hover {
+  text-decoration: underline;
+}
+
+.pa-checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.pa-checkbox-label {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: var(--paper-dark);
+  border: 1px solid var(--rule-thin);
+  padding: 0.2rem 0.5rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.pa-checkbox-label:has(input:checked) {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}

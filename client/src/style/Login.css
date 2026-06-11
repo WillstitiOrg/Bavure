@@ -1,0 +1,108 @@
+@import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap');
+
+.lp-root {
+  min-height: 100vh;
+  background: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.lp-card {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-top: 4px double var(--rule);
+  border-bottom: 4px double var(--rule);
+  padding: 3rem 2.5rem;
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+}
+
+.lp-masthead-title {
+  font-family: 'UnifrakturMaguntia', cursive;
+  font-size: 3.5rem;
+  color: var(--ink);
+  line-height: 1;
+  margin-bottom: 0.3rem;
+}
+
+.lp-rule {
+  color: var(--rust);
+  font-size: 1.1rem;
+  margin: 0.4rem 0;
+}
+
+.lp-tagline {
+  font-family: 'IM Fell English SC', serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-faded);
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--rule-thin);
+}
+
+.lp-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  text-align: left;
+}
+
+.lp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.lp-field label {
+  font-family: 'IM Fell English SC', serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faded);
+}
+
+.lp-field input {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.95rem;
+  background: var(--paper-dark);
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  padding: 0.6rem 0.8rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.lp-field input:focus {
+  border-color: var(--rust);
+}
+
+.lp-error {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.75rem;
+  color: var(--rust);
+  text-align: center;
+  font-style: italic;
+}
+
+.lp-submit {
+  font-family: 'IM Fell English SC', serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  padding: 0.8rem 1.5rem;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: background 0.2s;
+}
+
+.lp-submit:hover {
+  background: var(--rust);
+}

@@ -1,0 +1,109 @@
+.pa-section {
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid var(--rule-thin);
+}
+.pa-section-title {
+  font-family: 'IM Fell English SC', serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faded);
+  margin-bottom: 1.2rem;
+}
+.pa-create-row {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+.pa-pwd-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+.pa-btn-random {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.75rem;
+  background: var(--paper-dark);
+  border: 1px solid var(--rule);
+  color: var(--ink);
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.pa-btn-random:hover { background: var(--rule-thin); }
+.pa-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.82rem;
+}
+.pa-table th {
+  font-family: 'IM Fell English SC', serif;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faded);
+  text-align: left;
+  padding: 0.5rem 0.8rem;
+  border-bottom: 2px solid var(--rule);
+}
+.pa-table td {
+  padding: 0.5rem 0.8rem;
+  border-bottom: 1px solid var(--rule-thin);
+  vertical-align: middle;
+}
+.pa-table input[type="text"],
+.pa-table input[type="date"] {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.8rem;
+  background: var(--paper-dark);
+  border: 1px solid var(--rule);
+  color: var(--ink);
+  padding: 0.3rem 0.5rem;
+  width: 100%;
+}
+.pa-nom { font-family: 'IM Fell English', serif; font-size: 1rem; }
+.pa-pwd { color: var(--ink-faded); }
+.pa-actions { display: flex; gap: 0.5rem; }
+.pa-btn-edit {
+  font-family: 'IM Fell English SC', serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+}
+.pa-btn-edit:hover { background: var(--rust); }
+.pa-btn-save {
+  font-family: 'IM Fell English SC', serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  background: #3a5a2a;
+  color: var(--paper);
+  border: none;
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+}
+.pa-btn-cancel, .pa-btn-delete {
+  font-family: 'IM Fell English SC', serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  background: var(--rust);
+  color: var(--paper);
+  border: none;
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+}
+.pa-flash {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.8rem;
+  text-align: center;
+  padding: 0.8rem;
+  background: var(--paper-dark);
+  border-bottom: 1px solid var(--rule);
+  color: var(--ink);
+  font-style: italic;
+}
