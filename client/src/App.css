@@ -410,9 +410,10 @@ body { background: var(--paper); color: var(--ink); }
 
 .hp-masthead-nav a {
   cursor: pointer;
-  transition: color 0.2s;
 }
 
 .hp-masthead-nav a:hover {
-  color: var(--rust);
+  color: var(--paper);
+  background: var(--rust);
+  padding: 0.15rem 0.8rem;
 }
