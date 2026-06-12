@@ -13,6 +13,11 @@ type Citoyen = {
   accesParutions: number[]
 }
 
+type GroupeFichier = {
+  num: number
+  files: string[]
+}
+
 const API = import.meta.env.VITE_API_URL || "http://localhost:3001"
 
 const randomPassword = () => {
@@ -25,6 +30,21 @@ const toInputDate = (dateStr: string | null) => {
   return new Date(dateStr).toISOString().split('T')[0]
 }
 
+const grouperFichiers = (files: string[]): GroupeFichier[] => {
+  const grouped: Record<number, string[]> = {}
+  files.forEach(f => {
+    const match = f.match(/^(\d+)/)
+    if (match) {
+      const num = Number(match[1])
+      if (!grouped[num]) grouped[num] = []
+      grouped[num].push(f)
+    }
+  })
+  return Object.entries(grouped)
+    .map(([num, files]) => ({ num: Number(num), files }))
+    .sort((a, b) => a.num - b.num)
+}
+
 export default function PanelAdmin() {
   const navigate = useNavigate()
   const [citoyens, setCitoyens] = useState<Citoyen[]>([])
@@ -32,7 +52,9 @@ export default function PanelAdmin() {
   const [editData, setEditData] = useState<Partial<Citoyen>>({})
   const [newCitoyen, setNewCitoyen] = useState({ nom: '', password: randomPassword() })
   const [message, setMessage] = useState("")
-  const [parutionsDisponibles, setParutionsDisponibles] = useState<number[]>([]) // ← ici, dans le composant
+  const [parutionsDisponibles, setParutionsDisponibles] = useState<number[]>([])
+  const [groupesPrivate, setGroupesPrivate] = useState<GroupeFichier[]>([])
+  const [uploading, setUploading] = useState(false)
 
   const load = () => {
     fetch(`${API}/api/citoyens`)
@@ -40,23 +62,21 @@ export default function PanelAdmin() {
       .then(setCitoyens)
   }
 
+  const loadFiles = () => {
+    fetch(`${API}/api/files/private`)
+      .then(r => r.json())
+      .then((files: string[]) => {
+        const groupes = grouperFichiers(files)
+        setGroupesPrivate(groupes)
+        setParutionsDisponibles(groupes.map(g => g.num))
+      })
+  }
+
   useEffect(() => {
     const citoyen = JSON.parse(sessionStorage.getItem("citoyen") || "{}")
     if (citoyen.role !== "admin") navigate("/")
     load()
-
-    // Récupère les parutions privées disponibles
-    fetch(`${API}/api/files/private`)
-      .then(r => r.json())
-      .then((files: string[]) => {
-        const nums = [...new Set(
-          files
-            .map(f => f.match(/^(\d+)/)?.[1])
-            .filter(Boolean)
-            .map(Number)
-        )].sort((a, b) => a - b)
-        setParutionsDisponibles(nums)
-      })
+    loadFiles()
   }, [])
 
   const flash = (msg: string) => {
@@ -111,6 +131,28 @@ export default function PanelAdmin() {
     })
   }
 
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return
+    setUploading(true)
+    const formData = new FormData()
+    Array.from(e.target.files).forEach(f => formData.append('files', f))
+    await fetch(`${API}/api/upload/private`, { method: 'POST', body: formData })
+    setUploading(false)
+    loadFiles()
+    flash("Fichiers uploadés.")
+  }
+
+  const moveToFree = async (num: number) => {
+    await fetch(`${API}/api/files/move-to-free`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ numero: num })
+    })
+    load()
+    loadFiles()
+    flash(`Bavure #${num} déplacée vers accès libre.`)
+  }
+
   return (
     <div className="hp-root">
       <Masterhead />
@@ -152,7 +194,7 @@ export default function PanelAdmin() {
         </div>
       </div>
 
-      {/* LISTE */}
+      {/* LISTE CITOYENS */}
       <div className="pa-section">
         <div className="pa-section-title">Citoyens ({citoyens.length})</div>
         <table className="pa-table">
@@ -171,7 +213,6 @@ export default function PanelAdmin() {
             {citoyens.map(c => (
               <tr key={c.id}>
                 <td className="pa-nom">{c.nom}</td>
-
                 {editId === c.id ? (
                   <>
                     <td>
@@ -249,6 +290,41 @@ export default function PanelAdmin() {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* GESTION FICHIERS */}
+      <div className="pa-section">
+        <div className="pa-section-title">Gestion des fichiers</div>
+
+        <div className="pa-files-upload">
+          <label className="pa-upload-label">Upload vers accès privé</label>
+          <input
+            type="file"
+            multiple
+            accept="image/*"
+            onChange={handleUpload}
+            className="pa-file-input"
+          />
+          {uploading && <span className="pa-uploading">Upload en cours...</span>}
+        </div>
+
+        <div className="pa-files-col">
+          <div className="pa-files-header">Privé ({groupesPrivate.length} bavures)</div>
+          {groupesPrivate.length === 0 && (
+            <div className="pa-file-row"><span className="pa-file-name">Aucun fichier</span></div>
+          )}
+          {groupesPrivate.map(({ num, files }) => (
+            <div key={num} className="pa-file-row">
+              <div>
+                <span className="pa-file-name"><strong>Bavure #{num}</strong></span>
+                <div className="pa-file-parts">{files.join(', ')}</div>
+              </div>
+              <button className="pa-btn-edit" onClick={() => moveToFree(num)}>
+                → Accès libre
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
 
       <footer className="hp-footer">

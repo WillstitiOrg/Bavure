@@ -391,3 +391,19 @@ body { background: var(--paper); color: var(--ink); }
   color: var(--paper);
   border-color: var(--ink);
 }
+
+.pa-upload-label {
+  font-family: 'IM Fell English SC', serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faded);
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.pa-file-parts {
+  font-size: 0.62rem;
+  color: var(--ink-faded);
+  margin-top: 0.2rem;
+}
