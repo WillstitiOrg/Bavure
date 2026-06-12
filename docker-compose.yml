@@ -1,6 +1,8 @@
 services:
   client:
-    build: ./client
+    build:
+      context: .
+      dockerfile: client/Dockerfile
     ports:
       - "80:80"
     volumes:
@@ -9,7 +11,9 @@ services:
       - server
 
   server:
-    build: ./server
+    build:
+      context: .
+      dockerfile: server/Dockerfile
     ports:
       - "3001:3001"
     environment:
