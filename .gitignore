@@ -16,7 +16,8 @@ server/.env
 *.env.production.local
 
 # Uploads (images sur le serveur, pas dans git)
-uploads/
+uploads/free_access/
+uploads/private_access/
 
 # Prisma
 server/prisma/migrations/

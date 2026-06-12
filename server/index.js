@@ -5,7 +5,6 @@ const fs = require('fs')
 const path = require('path')
 const app = express()
 const prisma = new PrismaClient()
-const API = import.meta.env.VITE_API_URL || "http://localhost:3001"
 
 app.use(cors())
 app.use(express.json())
@@ -26,7 +25,7 @@ app.post('/api/login', async (req, res) => {
   res.json({ success: true, citoyen: { id: citoyen.id, nom: citoyen.nom, abonne: citoyen.abonne, role: citoyen.nom === 'Harranu' ? 'admin' : 'user' } })
 })
 
-app.listen(3001, () => console.log(`Server running on ${API}`))
+app.listen(3001, () => console.log('Server running on http://localhost:3001'))
 
 app.get('/api/free_access', (req, res) => {
   const dir = path.join(__dirname, '../uploads/free_access')
