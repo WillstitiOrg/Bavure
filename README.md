@@ -14,7 +14,7 @@
 
 - Un VPS sous Ubuntu 24.04
 - Docker installé
-- Un nom de domaine avec un enregistrement DNS A pointant vers l'IP du VPS
+- Un nom de domaine avec un enregistrement DNS A pointant vers l'IP du VPS (TTL à 300)
 - Git installé
 
 ---
@@ -39,6 +39,7 @@ su - william
 ```bash
 ssh-keygen -t ed25519 -C "william@labavure"
 ssh-copy-id william@ton-ip-vps
+ssh william@ton-ip-vps
 ```
 
 ### Installation de Docker
@@ -69,6 +70,9 @@ nano ~/docker-compose.traefik.yml
 services:
   traefik:
     image: traefik:v3
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     ports:
       - "80:80"
       - "443:443"
@@ -90,6 +94,8 @@ networks:
   web:
     external: true
 ```
+
+> ⚠️ Le `dns: [8.8.8.8, 1.1.1.1]` est indispensable pour que Traefik puisse contacter Let's Encrypt depuis le conteneur.
 
 ### Créer le fichier acme.json (certificats SSL)
 
@@ -132,8 +138,10 @@ nano .env
 POSTGRES_USER=william
 POSTGRES_PASSWORD=tonmdp
 POSTGRES_DB=labavure
-DATABASE_URL=postgresql://william:tonmdp@postgres:5432/labavure
+DATABASE_URL="postgresql://william:tonmdp@postgres:5432/labavure"
 ```
+
+> ⚠️ Si le mot de passe contient des caractères spéciaux (`!`, `@`, `#`...), mettre `DATABASE_URL` entre guillemets.
 
 ### Créer les dossiers uploads
 
@@ -153,15 +161,42 @@ docker compose up --build -d
 docker compose ps
 ```
 
-### Appliquer les migrations Prisma
+### Créer les tables en base de données
 
 ```bash
+# Option 1 — Si les migrations sont dans le repo
 docker compose exec server npx prisma migrate deploy
+
+# Option 2 — Si pas de dossier migrations (première fois)
+docker compose exec server npx prisma db push
+```
+
+> ⚠️ `prisma db push` crée les tables directement depuis le schéma sans fichier de migration. À utiliser si `migrations/` n'est pas dans le repo.
+> Pour éviter ce problème à l'avenir, ne pas ignorer `prisma/migrations/` dans le `.gitignore`.
+
+---
+
+## 4. Configuration DNS (Gandi)
+
+Dans l'interface Gandi, ajouter un enregistrement A par sous-domaine :
+
+```
+Type  : A
+Nom   : labavure-dargos
+Valeur: 147.79.21.51
+TTL   : 300
+```
+
+Vérifier la propagation :
+
+```bash
+ping labavure-dargos.willstiti.fr
+# Doit répondre avec 147.79.21.51
 ```
 
 ---
 
-## 4. Structure des fichiers
+## 5. Structure des fichiers
 
 ```
 la-bavure/
@@ -172,9 +207,10 @@ la-bavure/
 │   ├── Dockerfile
 │   ├── index.js
 │   └── prisma/
-│       └── schema.prisma
+│       ├── schema.prisma
+│       └── migrations/       # À versionner dans git
 ├── nginx/
-│   └── nginx.conf            # Config Nginx
+│   └── nginx.conf
 ├── uploads/                  # Images (non versionné)
 │   ├── free_access/
 │   └── private_access/
@@ -185,7 +221,23 @@ la-bavure/
 
 ---
 
-## 5. Mise à jour du site
+## 6. Variables d'environnement front (React)
+
+Pour que le front pointe vers la bonne API en prod, créer `client/.env.production` :
+
+```env
+VITE_API_URL=https://labavure-dargos.willstiti.fr
+```
+
+Et dans le code React remplacer les `http://localhost:3001` par :
+
+```ts
+const API = import.meta.env.VITE_API_URL || "http://localhost:3001"
+```
+
+---
+
+## 7. Mise à jour du site
 
 ```bash
 cd ~/la-bavure
@@ -195,16 +247,14 @@ docker compose up --build -d
 
 ---
 
-## 6. Ajouter un nouveau site sur le même VPS
+## 8. Ajouter un nouveau site sur le même VPS
 
-### Configurer le DNS
-
-Dans l'interface Gandi, ajouter un enregistrement A :
+### Configurer le DNS sur Gandi
 
 ```
 Type  : A
 Nom   : nouveau-site
-Valeur: ton-ip-vps
+Valeur: 147.79.21.51
 TTL   : 300
 ```
 
@@ -212,7 +262,7 @@ TTL   : 300
 
 Chaque nouveau site doit :
 1. Utiliser le réseau `web` external
-2. Avoir des labels Traefik avec un nom de router unique
+2. Avoir des labels Traefik avec un **nom de router unique**
 3. Être dans son propre dossier
 
 ```yaml
@@ -239,17 +289,15 @@ cd ~/nouveau-site
 docker compose up --build -d
 ```
 
-Le certificat SSL est généré automatiquement par Traefik via Let's Encrypt.
-
 ---
 
-## 7. Commandes utiles
+## 9. Commandes utiles
 
 ```bash
 # Voir les conteneurs qui tournent
 docker compose ps
 
-# Voir les logs
+# Voir les logs en temps réel
 docker compose logs -f
 
 # Voir les logs d'un conteneur spécifique
@@ -261,7 +309,7 @@ docker compose restart server
 # Arrêter tous les conteneurs
 docker compose down
 
-# Arrêter et supprimer les volumes (attention : supprime la DB)
+# Arrêter et supprimer les volumes (⚠️ supprime la DB)
 docker compose down -v
 
 # Accéder au shell d'un conteneur
@@ -272,26 +320,33 @@ docker network ls
 
 # Voir tous les conteneurs (même arrêtés)
 docker ps -a
+
+# Vérifier les ports ouverts
+sudo ss -tlnp | grep -E '80|443'
 ```
 
 ---
 
-## 8. Prisma
+## 10. Prisma
 
 ```bash
+# Créer les tables depuis le schéma (première fois en prod sans migrations)
+docker compose exec server npx prisma db push
+
 # Appliquer les migrations en prod
 docker compose exec server npx prisma migrate deploy
 
+# Créer une nouvelle migration (en local uniquement)
+cd server
+npx prisma migrate dev --name nom_migration
+
 # Ouvrir Prisma Studio (en local uniquement)
 npx prisma studio
-
-# Créer une nouvelle migration (en local)
-npx prisma migrate dev --name nom_migration
 ```
 
 ---
 
-## 9. Uploads
+## 11. Uploads
 
 Les fichiers uploadés sont stockés dans `~/la-bavure/uploads/` sur le VPS.
 Ce dossier est monté en volume Docker — il persiste même si les conteneurs sont reconstruits.
