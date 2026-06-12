@@ -407,3 +407,12 @@ body { background: var(--paper); color: var(--ink); }
   color: var(--ink-faded);
   margin-top: 0.2rem;
 }
+
+.hp-masthead-nav a {
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.hp-masthead-nav a:hover {
+  color: var(--rust);
+}
