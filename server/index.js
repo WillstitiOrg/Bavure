@@ -78,7 +78,7 @@ app.get('/api/private_access', async (req, res) => {
 
   const citoyen = await prisma.citoyen.findUnique({ where: { nom } })
 
-  if (!citoyen || !citoyen.abonne) {
+  if (!citoyen) {
     return res.status(403).json({ error: 'Accès refusé.' })
   }
 
@@ -191,30 +191,50 @@ app.get('/api/files/private', (req, res) => {
   res.json(files)
 })
 
-// Lister les fichiers free
-app.get('/api/files/free', (req, res) => {
-  const dir = path.join(__dirname, '../uploads/free_access')
-  const files = fs.readdirSync(dir)
-    .filter(f => /\.(png|jpg|jpeg|webp)$/i.test(f))
-    .sort()
-  res.json(files)
-})
-
 // Upload vers private_access
 app.post('/api/upload/private', upload.array('files'), (req, res) => {
   res.json({ success: true, files: req.files.map(f => f.originalname) })
 })
 
 // Déplacer private → free
-app.post('/api/files/move-to-free', (req, res) => {
-  const { filename } = req.body
-  const src = path.join(__dirname, '../uploads/private_access', filename)
-  const dest = path.join(__dirname, '../uploads/free_access', filename)
+app.post('/api/files/move-to-free', async (req, res) => {
+  const { numero } = req.body  // ← on reçoit un numéro, pas un filename
+
+  const srcDir = path.join(__dirname, '../uploads/private_access')
+  const destDir = path.join(__dirname, '../uploads/free_access')
+
   try {
-    fs.renameSync(src, dest)
-    res.json({ success: true })
+    // Trouve tous les fichiers qui commencent par ce numéro
+    const files = fs.readdirSync(srcDir)
+      .filter(f => f.match(new RegExp(`^${numero}[^\\d]|^${numero}\\.`)))
+
+    if (files.length === 0) {
+      return res.status(400).json({ error: 'Aucun fichier trouvé pour ce numéro.' })
+    }
+
+    files.forEach(f => {
+      fs.renameSync(
+        path.join(srcDir, f),
+        path.join(destDir, f)
+      )
+    })
+
+    // Retire le numéro de accesParutions de tous les citoyens
+    const citoyens = await prisma.citoyen.findMany({
+      where: { accesParutions: { has: numero } }
+    })
+
+    await Promise.all(citoyens.map(c =>
+      prisma.citoyen.update({
+        where: { id: c.id },
+        data: { accesParutions: c.accesParutions.filter(n => n !== numero) }
+      })
+    ))
+
+    res.json({ success: true, moved: files })
   } catch (e) {
-    res.status(400).json({ error: 'Fichier introuvable.' })
+    console.error(e)
+    res.status(400).json({ error: 'Erreur lors du déplacement.' })
   }
 })
 
