@@ -1,93 +1,306 @@
-# La Bavure
+# La Bavure D'Argos — Documentation
 
+## Stack technique
 
+- **Front** : React + Vite + TypeScript
+- **Back** : Node.js + Express + Prisma
+- **DB** : PostgreSQL
+- **Reverse proxy** : Traefik (SSL automatique via Let's Encrypt)
+- **Conteneurisation** : Docker + Docker Compose
 
-## Getting started
+---
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+## Prérequis
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+- Un VPS sous Ubuntu 24.04
+- Docker installé
+- Un nom de domaine avec un enregistrement DNS A pointant vers l'IP du VPS
+- Git installé
 
-## Add your files
+---
 
-* [Create](https://docs.gitlab.com/user/project/repository/web_editor/#create-a-file) or [upload](https://docs.gitlab.com/user/project/repository/web_editor/#upload-a-file) files
-* [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+## 1. Première installation sur le VPS
+
+### Connexion et création d'un utilisateur
+
+```bash
+ssh root@ton-ip-vps
+
+adduser william
+usermod -aG sudo william
+usermod -aG docker william
+
+# Se reconnecter avec le nouvel utilisateur
+su - william
+```
+
+### Clé SSH (depuis ta machine locale)
+
+```bash
+ssh-keygen -t ed25519 -C "william@labavure"
+ssh-copy-id william@ton-ip-vps
+```
+
+### Installation de Docker
+
+```bash
+curl -fsSL https://get.docker.com | sh
+```
+
+---
+
+## 2. Configuration de Traefik (une seule fois)
+
+Traefik est le reverse proxy qui gère le routing et les certificats SSL pour tous tes projets.
+
+### Créer le réseau Docker partagé
+
+```bash
+docker network create web
+```
+
+### Créer le fichier de configuration Traefik
+
+```bash
+nano ~/docker-compose.traefik.yml
+```
+
+```yaml
+services:
+  traefik:
+    image: traefik:v3
+    ports:
+      - "80:80"
+      - "443:443"
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.email=tonemail@gmail.com"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./acme.json:/acme.json
+    networks:
+      - web
+
+networks:
+  web:
+    external: true
+```
+
+### Créer le fichier acme.json (certificats SSL)
+
+```bash
+touch ~/acme.json
+chmod 600 ~/acme.json
+```
+
+### Lancer Traefik
+
+```bash
+docker compose -f ~/docker-compose.traefik.yml up -d
+```
+
+### Vérifier que Traefik tourne
+
+```bash
+docker compose -f ~/docker-compose.traefik.yml ps
+```
+
+---
+
+## 3. Déploiement de La Bavure
+
+### Cloner le repo
+
+```bash
+cd ~
+git clone ton-url-repo
+cd la-bavure
+```
+
+### Créer le fichier .env
+
+```bash
+nano .env
+```
+
+```env
+POSTGRES_USER=william
+POSTGRES_PASSWORD=tonmdp
+POSTGRES_DB=labavure
+DATABASE_URL=postgresql://william:tonmdp@postgres:5432/labavure
+```
+
+### Créer les dossiers uploads
+
+```bash
+mkdir -p uploads/free_access uploads/private_access
+```
+
+### Lancer les conteneurs
+
+```bash
+docker compose up --build -d
+```
+
+### Vérifier que tout tourne
+
+```bash
+docker compose ps
+```
+
+### Appliquer les migrations Prisma
+
+```bash
+docker compose exec server npx prisma migrate deploy
+```
+
+---
+
+## 4. Structure des fichiers
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/Willstiti1/la-bavure.git
-git branch -M main
-git push -uf origin main
+la-bavure/
+├── client/                   # React + Vite
+│   ├── Dockerfile
+│   └── src/
+├── server/                   # Express + Prisma
+│   ├── Dockerfile
+│   ├── index.js
+│   └── prisma/
+│       └── schema.prisma
+├── nginx/
+│   └── nginx.conf            # Config Nginx
+├── uploads/                  # Images (non versionné)
+│   ├── free_access/
+│   └── private_access/
+├── docker-compose.yml
+├── .env                      # Non versionné
+└── .gitignore
 ```
 
-## Integrate with your tools
+---
 
-* [Set up project integrations](https://gitlab.com/Willstiti1/la-bavure/-/settings/integrations)
+## 5. Mise à jour du site
 
-## Collaborate with your team
+```bash
+cd ~/la-bavure
+git pull
+docker compose up --build -d
+```
 
-* [Invite team members and collaborators](https://docs.gitlab.com/user/project/members/)
-* [Create a new merge request](https://docs.gitlab.com/user/project/merge_requests/creating_merge_requests/)
-* [Automatically close issues from merge requests](https://docs.gitlab.com/user/project/issues/managing_issues/#closing-issues-automatically)
-* [Enable merge request approvals](https://docs.gitlab.com/user/project/merge_requests/approvals/)
-* [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+---
 
-## Test and Deploy
+## 6. Ajouter un nouveau site sur le même VPS
 
-Use the built-in continuous integration in GitLab.
+### Configurer le DNS
 
-* [Get started with GitLab CI/CD](https://docs.gitlab.com/ci/quick_start/)
-* [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/user/application_security/sast/)
-* [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/topics/autodevops/requirements/)
-* [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/user/clusters/agent/)
-* [Set up protected environments](https://docs.gitlab.com/ci/environments/protected_environments/)
+Dans l'interface Gandi, ajouter un enregistrement A :
 
-***
+```
+Type  : A
+Nom   : nouveau-site
+Valeur: ton-ip-vps
+TTL   : 300
+```
 
-# Editing this README
+### Créer le docker-compose.yml du nouveau site
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+Chaque nouveau site doit :
+1. Utiliser le réseau `web` external
+2. Avoir des labels Traefik avec un nom de router unique
+3. Être dans son propre dossier
 
-## Suggestions for a good README
+```yaml
+services:
+  client:
+    build: .
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.NOM-UNIQUE.rule=Host(`sous-domaine.willstiti.fr`)"
+      - "traefik.http.routers.NOM-UNIQUE.entrypoints=websecure"
+      - "traefik.http.routers.NOM-UNIQUE.tls.certresolver=letsencrypt"
+    networks:
+      - web
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+networks:
+  web:
+    external: true
+```
 
-## Name
-Choose a self-explaining name for your project.
+### Lancer le nouveau site
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+```bash
+cd ~/nouveau-site
+docker compose up --build -d
+```
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+Le certificat SSL est généré automatiquement par Traefik via Let's Encrypt.
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+---
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+## 7. Commandes utiles
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+```bash
+# Voir les conteneurs qui tournent
+docker compose ps
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+# Voir les logs
+docker compose logs -f
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+# Voir les logs d'un conteneur spécifique
+docker compose logs -f server
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+# Redémarrer un conteneur
+docker compose restart server
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+# Arrêter tous les conteneurs
+docker compose down
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+# Arrêter et supprimer les volumes (attention : supprime la DB)
+docker compose down -v
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+# Accéder au shell d'un conteneur
+docker compose exec server sh
 
-## License
-For open source projects, say how it is licensed.
+# Voir tous les réseaux Docker
+docker network ls
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+# Voir tous les conteneurs (même arrêtés)
+docker ps -a
+```
+
+---
+
+## 8. Prisma
+
+```bash
+# Appliquer les migrations en prod
+docker compose exec server npx prisma migrate deploy
+
+# Ouvrir Prisma Studio (en local uniquement)
+npx prisma studio
+
+# Créer une nouvelle migration (en local)
+npx prisma migrate dev --name nom_migration
+```
+
+---
+
+## 9. Uploads
+
+Les fichiers uploadés sont stockés dans `~/la-bavure/uploads/` sur le VPS.
+Ce dossier est monté en volume Docker — il persiste même si les conteneurs sont reconstruits.
+
+```bash
+# Lister les fichiers
+ls ~/la-bavure/uploads/free_access/
+ls ~/la-bavure/uploads/private_access/
+
+# Copier un fichier depuis ta machine locale vers le VPS
+scp monfichier.png william@147.79.21.51:~/la-bavure/uploads/free_access/
+```

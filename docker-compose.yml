@@ -3,8 +3,14 @@ services:
     build:
       context: .
       dockerfile: client/Dockerfile
-    ports:
-      - "80:80"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.labavure.rule=Host(`labavure-dargos.willstiti.fr`)"
+      - "traefik.http.routers.labavure.entrypoints=websecure"
+      - "traefik.http.routers.labavure.tls.certresolver=letsencrypt"
+      - "traefik.http.services.labavure.loadbalancer.server.port=80"
+    networks:
+      - web
     volumes:
       - ./uploads:/uploads
     depends_on:
@@ -14,12 +20,18 @@ services:
     build:
       context: .
       dockerfile: server/Dockerfile
-    ports:
-      - "3001:3001"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.labavure-api.rule=Host(`labavure-dargos.willstiti.fr`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.labavure-api.entrypoints=websecure"
+      - "traefik.http.routers.labavure-api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.labavure-api.loadbalancer.server.port=3001"
     environment:
       DATABASE_URL: ${DATABASE_URL}
     volumes:
       - ./uploads:/uploads
+    networks:
+      - web
     depends_on:
       - postgres
 
@@ -31,6 +43,12 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - pgdata:/var/lib/postgresql/data
+    networks:
+      - web
 
 volumes:
   pgdata:
+
+networks:
+  web:
+    external: true
