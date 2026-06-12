@@ -9,12 +9,14 @@ export default function LoginPage() {
   const [mdp, setMdp] = useState("");
   const [error, setError] = useState("");
 
+const API = import.meta.env.VITE_API_URL || "http://localhost:3001"
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
     try {
-      const res = await fetch("http://localhost:3001/api/login", {
+      const res = await fetch(`${API}/api/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nom: pseudo, password: mdp })

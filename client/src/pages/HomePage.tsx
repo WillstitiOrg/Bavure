@@ -7,12 +7,14 @@ type Bavure = {
   imgs: string[]
 }
 
+const API = import.meta.env.VITE_API_URL || "http://localhost:3001"
+
 export default function HomePage() {
   const [bavures, setBavures] = useState<Bavure[]>([])
   const [selectedId, setSelectedId] = useState<number>(1)
 
   useEffect(() => {
-    fetch("http://localhost:3001/api/free_access")
+    fetch(`${API}/api/free_access`)
       .then(res => res.json())
       .then(data => {
         setBavures(data)
@@ -54,7 +56,7 @@ export default function HomePage() {
             {current.imgs.map((src, i) => (
               <img
                 key={i}
-                src={`http://localhost:3001${src}`}
+                src={`${API}${src}`}
                 alt={`${current.title} - image ${i + 1}`}
                 loading="lazy"
               />

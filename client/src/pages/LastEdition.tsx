@@ -7,11 +7,13 @@ type Bavure = {
   imgs: string[]
 }
 
+const API = import.meta.env.VITE_API_URL || "http://localhost:3001"
+
 export default function DerniereEdition() {
   const [bavure, setBavure] = useState<Bavure | null>(null)
 
   useEffect(() => {
-    fetch("http://localhost:3001/api/last_edition")
+    fetch(`${API}/api/last_edition`)
       .then(res => res.json())
       .then((data: Bavure[]) => {
         if (data.length > 0) {
@@ -37,7 +39,7 @@ export default function DerniereEdition() {
             {bavure.imgs.map((src, i) => (
               <img
                 key={i}
-                src={`http://localhost:3001${src}`}
+                src={`${API}${src}`}
                 alt={`${bavure.title} - image ${i + 1}`}
                 loading="lazy"
               />

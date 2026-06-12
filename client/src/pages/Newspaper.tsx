@@ -7,6 +7,8 @@ type Bavure = {
   imgs: string[]
 }
 
+const API = import.meta.env.VITE_API_URL || "http://localhost:3001"
+
 export default function NewsPaper() {
   const [bavures, setBavures] = useState<Bavure[]>([])
   const [selectedId, setSelectedId] = useState<number>(1)
@@ -15,7 +17,7 @@ export default function NewsPaper() {
     const citoyen = JSON.parse(sessionStorage.getItem("citoyen") || "null")
     if (!citoyen) return
 
-    fetch(`http://localhost:3001/api/private_access?nom=${citoyen.nom}`)
+    fetch(`${API}/api/private_access?nom=${citoyen.nom}`)
       .then(res => res.json())
       .then(data => {
         setBavures(data)
@@ -57,7 +59,7 @@ export default function NewsPaper() {
             {current.imgs.map((src, i) => (
               <img
                 key={i}
-                src={`http://localhost:3001${src}`}
+                src={`${API}${src}`}
                 alt={`${current.title} - image ${i + 1}`}
                 loading="lazy"
               />
