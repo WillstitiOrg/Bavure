@@ -1,8 +1,8 @@
 FROM node:20-alpine
 WORKDIR /app
-COPY package*.json ./
+COPY server/package*.json ./
 RUN npm install
-COPY . .
+COPY server/ .
 RUN npx prisma generate
 EXPOSE 3001
 CMD ["node", "index.js"]
