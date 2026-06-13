@@ -11,6 +11,9 @@ type Citoyen = {
   PremierAbonnement: string | null
   finAbonnement: string | null
   accesParutions: number[]
+  futurAbonnement: boolean
+  nbAbonnement: number
+  nouveau: boolean
 }
 
 type GroupeFichier = {
@@ -128,6 +131,9 @@ export default function PanelAdmin() {
       PremierAbonnement: toInputDate(c.PremierAbonnement),
       finAbonnement: toInputDate(c.finAbonnement),
       accesParutions: c.accesParutions,
+      futurAbonnement: c.futurAbonnement,
+      nbAbonnement: c.nbAbonnement,
+      nouveau: c.nouveau
     })
   }
 
@@ -202,10 +208,13 @@ export default function PanelAdmin() {
             <tr>
               <th>Nom</th>
               <th>Mot de passe</th>
+              <th>Nouveau</th>
               <th>Abonné</th>
+              <th>Futur abonnement</th>
               <th>Début abonnement</th>
               <th>Fin abonnement</th>
               <th>Parutions accessibles</th>
+              <th>Nombre d'abonnements</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -228,8 +237,22 @@ export default function PanelAdmin() {
                     <td>
                       <input
                         type="checkbox"
+                        checked={editData.nouveau ?? false}
+                        onChange={e => setEditData(p => ({ ...p, nouveau: e.target.checked }))}
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="checkbox"
                         checked={editData.abonne ?? false}
                         onChange={e => setEditData(p => ({ ...p, abonne: e.target.checked }))}
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="checkbox"
+                        checked={editData.futurAbonnement ?? false}
+                        onChange={e => setEditData(p => ({ ...p, futurAbonnement: e.target.checked }))}
                       />
                     </td>
                     <td>
@@ -268,6 +291,13 @@ export default function PanelAdmin() {
                         ))}
                       </div>
                     </td>
+                    <td>
+                      <div className="pa-counter">
+                        <button className="pa-counter-btn" onClick={() => setEditData(p => ({ ...p, nbAbonnement: Math.max(0, (p.nbAbonnement ?? 0) - 1) }))}>−</button>
+                        <span className="pa-counter-value">{editData.nbAbonnement ?? 0}</span>
+                        <button className="pa-counter-btn" onClick={() => setEditData(p => ({ ...p, nbAbonnement: (p.nbAbonnement ?? 0) + 1 }))}>+</button>
+                      </div>
+                    </td>
                     <td className="pa-actions">
                       <button className="pa-btn-save" onClick={() => sauvegarder(c.id)}>✓ Sauver</button>
                       <button className="pa-btn-cancel" onClick={() => setEditId(null)}>✕</button>
@@ -276,10 +306,13 @@ export default function PanelAdmin() {
                 ) : (
                   <>
                     <td className="pa-pwd">{c.password}</td>
+                    <td>{c.nouveau ? "✓ Oui" : "Non"}</td>
                     <td>{c.abonne ? "✓ Oui" : "Non"}</td>
+                    <td>{c.futurAbonnement ? "✓ Oui" : "Non"}</td>
                     <td>{c.PremierAbonnement ? toInputDate(c.PremierAbonnement) : "—"}</td>
                     <td>{c.finAbonnement ? toInputDate(c.finAbonnement) : "—"}</td>
                     <td>{c.accesParutions?.length > 0 ? c.accesParutions.map(n => `#${n}`).join(' · ') : "—"}</td>
+                    <td>{c.nbAbonnement}</td>
                     <td className="pa-actions">
                       <button className="pa-btn-edit" onClick={() => startEdit(c)}>Modifier</button>
                       <button className="pa-btn-delete" onClick={() => supprimer(c.id)}>Supprimer</button>

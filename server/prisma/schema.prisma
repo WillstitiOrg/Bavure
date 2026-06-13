@@ -15,4 +15,7 @@ model Citoyen {
   PremierAbonnement DateTime?
   finAbonnement  DateTime?
   accesParutions    Int[]
+  futurAbonnement Boolean @default(false)
+  nbAbonnement    Int     @default(0)
+  nouveau         Boolean @default(false)
 }

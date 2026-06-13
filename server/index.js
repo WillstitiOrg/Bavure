@@ -161,7 +161,7 @@ app.post('/api/citoyens', async (req, res) => {
 })
 
 app.put('/api/citoyens/:id', async (req, res) => {
-  const { password, abonne, PremierAbonnement, finAbonnement, accesParutions } = req.body
+  const { password, abonne, PremierAbonnement, finAbonnement, accesParutions, futurAbonnement, nbAbonnement, nouveau } = req.body
   const citoyen = await prisma.citoyen.update({
     where: { id: Number(req.params.id) },
     data: {
@@ -170,6 +170,9 @@ app.put('/api/citoyens/:id', async (req, res) => {
       ...(PremierAbonnement !== undefined && { PremierAbonnement: PremierAbonnement ? new Date(PremierAbonnement) : null }),
       ...(finAbonnement !== undefined && { finAbonnement: finAbonnement ? new Date(finAbonnement) : null }),
       ...(accesParutions !== undefined && { accesParutions }),
+      ...(futurAbonnement !== undefined && { futurAbonnement }),
+      ...(nbAbonnement !== undefined && { nbAbonnement }),
+      ...(nouveau !== undefined && { nouveau })
     }
   })
   res.json(citoyen)

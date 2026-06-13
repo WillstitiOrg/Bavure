@@ -417,3 +417,35 @@ body { background: var(--paper); color: var(--ink); }
   background: var(--rust);
   padding: 0.15rem 0.8rem;
 }
+
+.pa-counter {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--rule);
+  width: fit-content;
+}
+
+.pa-counter-btn {
+  font-family: 'Courier Prime', monospace;
+  font-size: 1rem;
+  background: var(--paper-dark);
+  border: none;
+  color: var(--ink);
+  width: 2rem;
+  height: 2rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.pa-counter-btn:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.pa-counter-value {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.9rem;
+  min-width: 2.5rem;
+  text-align: center;
+  color: var(--ink);
+}
