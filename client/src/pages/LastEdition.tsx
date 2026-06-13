@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import Masterhead from "../components/MasterHead";
+import ImageViewer from "../components/ImageViewer";
 
 type Bavure = {
   id: number
@@ -11,6 +12,8 @@ const API = import.meta.env.VITE_API_URL || "http://localhost:3001"
 
 export default function DerniereEdition() {
   const [bavure, setBavure] = useState<Bavure | null>(null)
+  const [viewerOpen, setViewerOpen] = useState(false)
+  const [viewerIndex, setViewerIndex] = useState(0)
 
   useEffect(() => {
     fetch(`${API}/api/last_edition`)
@@ -32,7 +35,7 @@ export default function DerniereEdition() {
         <span className="hp-section-rule-line" />
       </div>
 
-      {bavure ? (
+      {bavure && (
         <div className="hp-publication">
           <div className="hp-publication-title">{bavure.title}</div>
           <div className="hp-card-img-wrap">
@@ -42,16 +45,23 @@ export default function DerniereEdition() {
                 src={`${API}${src}`}
                 alt={`${bavure.title} - image ${i + 1}`}
                 loading="lazy"
+                style={{ cursor: 'zoom-in' }}
+                onClick={() => { setViewerIndex(i); setViewerOpen(true) }}
               />
             ))}
           </div>
         </div>
-      ) : (
-        <div className="hp-publication">
-          <p style={{ fontFamily: "'Courier Prime', monospace", color: "var(--ink-faded)" }}>
-            Chargement...
-          </p>
-        </div>
+      )}
+
+      {viewerOpen && bavure && (
+        <ImageViewer
+          imgs={bavure.imgs.map(src => `${API}${src}`)}
+          index={viewerIndex}
+          title={bavure.title}
+          onClose={() => setViewerOpen(false)}
+          onNext={() => setViewerIndex(i => Math.min(i + 1, bavure.imgs.length - 1))}
+          onPrev={() => setViewerIndex(i => Math.max(i - 1, 0))}
+        />
       )}
 
       <footer className="hp-footer">

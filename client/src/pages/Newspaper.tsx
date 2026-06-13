@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import Masterhead from "../components/MasterHead";
+import ImageViewer from "../components/ImageViewer";
 
 type Bavure = {
   id: number
@@ -12,6 +13,8 @@ const API = import.meta.env.VITE_API_URL || "http://localhost:3001"
 export default function NewsPaper() {
   const [bavures, setBavures] = useState<Bavure[]>([])
   const [selectedId, setSelectedId] = useState<number>(1)
+  const [viewerOpen, setViewerOpen] = useState(false)
+  const [viewerIndex, setViewerIndex] = useState(0)
 
   useEffect(() => {
     const citoyen = JSON.parse(sessionStorage.getItem("citoyen") || "null")
@@ -62,10 +65,23 @@ export default function NewsPaper() {
                 src={`${API}${src}`}
                 alt={`${current.title} - image ${i + 1}`}
                 loading="lazy"
+                style={{ cursor: 'zoom-in' }}
+                onClick={() => { setViewerIndex(i); setViewerOpen(true) }}
               />
             ))}
           </div>
         </div>
+      )}
+
+      {viewerOpen && current && (
+        <ImageViewer
+          imgs={current.imgs.map(src => `${API}${src}`)}
+          index={viewerIndex}
+          title={current.title}
+          onClose={() => setViewerOpen(false)}
+          onNext={() => setViewerIndex(i => Math.min(i + 1, current.imgs.length - 1))}
+          onPrev={() => setViewerIndex(i => Math.max(i - 1, 0))}
+        />
       )}
 
       <footer className="hp-footer">

@@ -449,3 +449,79 @@ body { background: var(--paper); color: var(--ink); }
   text-align: center;
   color: var(--ink);
 }
+
+/* VIEWER MODAL */
+.viewer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+
+.viewer-img {
+  width: 60%;
+  object-fit: contain;
+  filter: sepia(15%) contrast(1.04);
+  user-select: none;
+}
+
+.viewer-controls {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
+.viewer-btn {
+  font-family: 'Courier Prime', monospace;
+  font-size: 1.5rem;
+  background: none;
+  border: 1px solid var(--rule);
+  color: var(--paper);
+  width: 3rem;
+  height: 3rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.viewer-btn:hover { background: var(--rust); border-color: var(--rust); }
+.viewer-btn:disabled { opacity: 0.3; cursor: default; }
+
+.viewer-counter {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.8rem;
+  color: var(--rule);
+  letter-spacing: 0.1em;
+}
+
+.viewer-close {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  font-family: 'Courier Prime', monospace;
+  font-size: 1rem;
+  background: none;
+  border: 1px solid var(--rule);
+  color: var(--paper);
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.viewer-close:hover { background: var(--rust); border-color: var(--rust); }
+
+.viewer-title {
+  font-family: 'IM Fell English SC', serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--rule);
+  margin-bottom: 1rem;
+}
