@@ -72,6 +72,7 @@ app.post('/api/login', async (req, res) => {
       citoyen = await prisma.citoyen.update({
         where: { id: citoyen.id },
         data: {
+          password: defaultCitoyen.password,
           abonne: true,
           PremierAbonnement: citoyen.PremierAbonnement ?? new Date(),
           nbAbonnement: citoyen.nbAbonnement + 1,
