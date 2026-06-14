@@ -28,22 +28,111 @@ const upload = multer({ storage })
 app.post('/api/login', async (req, res) => {
   const { nom, password } = req.body
 
-  const citoyen = await prisma.citoyen.findUnique({ where: { nom } })
+  let citoyen = await prisma.citoyen.findFirst({ where: { nom } })
 
-  if (!citoyen || citoyen.password !== password) {
-    return res.status(401).json({ error: 'Identifiants incorrects.' })
+  // ─── CAS 1 : connexion normale (le compte existe et le mdp correspond) ───
+  if (citoyen && citoyen.password === password) {
+
+    // Si l'abonnement est expiré, on retire l'accès abonné
+    if (citoyen.abonne && citoyen.finAbonnement && new Date(citoyen.finAbonnement) < new Date()) {
+      citoyen = await prisma.citoyen.update({
+        where: { id: citoyen.id },
+        data: { abonne: false }
+      })
+    }
+
+    return res.json({
+      success: true,
+      citoyen: {
+        id: citoyen.id,
+        nom: citoyen.nom,
+        abonne: citoyen.abonne,
+        role: citoyen.nom === 'Harranu' ? 'admin' : 'user'
+      }
+    })
   }
 
-  res.json({
-    success: true,
-    citoyen: {
-      id: citoyen.id,
-      nom: citoyen.nom,
-      abonne: citoyen.abonne,
-      role: citoyen.nom === 'Harranu' ? 'admin' : 'user'
-    }
+  // ─── Sinon, on vérifie si le mot de passe correspond à un compte "Default" (code d'abonnement) ───
+  const defaultCitoyen = await prisma.citoyen.findFirst({
+    where: { nom: 'Default', password }
   })
+
+  if (defaultCitoyen && nom !== "Harranu") {
+
+    if (citoyen) {
+      const dir = path.join(__dirname, '../uploads/private_access')
+      const files = fs.readdirSync(dir)
+        .filter(f => /\.(png|jpg|jpeg|webp)$/i.test(f))
+
+      const toutesLesParutions = [...new Set(
+        files.map(f => f.match(/^(\d+)/)?.[1]).filter(Boolean).map(Number)
+      )].sort((a, b) => a - b)
+
+      // ─── CAS 2 : le joueur a déjà un compte → on le réabonne et on supprime le Default ───
+      citoyen = await prisma.citoyen.update({
+        where: { id: citoyen.id },
+        data: {
+          abonne: true,
+          PremierAbonnement: citoyen.PremierAbonnement ?? new Date(),
+          nbAbonnement: citoyen.nbAbonnement + 1,
+          finAbonnement: getFinAbonnement(),
+          accesParutions: toutesLesParutions
+        }
+      })
+
+      await prisma.citoyen.delete({ where: { id: defaultCitoyen.id } })
+
+    } else {
+      // ─── CAS 3 : première connexion → le compte Default devient celui du joueur ───
+
+      // Récupère tous les numéros de parutions présents dans private_access
+      const dir = path.join(__dirname, '../uploads/private_access')
+      const files = fs.readdirSync(dir)
+        .filter(f => /\.(png|jpg|jpeg|webp)$/i.test(f))
+
+      const toutesLesParutions = [...new Set(
+        files.map(f => f.match(/^(\d+)/)?.[1]).filter(Boolean).map(Number)
+      )].sort((a, b) => a - b)
+
+      citoyen = await prisma.citoyen.update({
+        where: { id: defaultCitoyen.id },
+        data: {
+          nom,
+          abonne: true,
+          PremierAbonnement: new Date(),
+          nbAbonnement: defaultCitoyen.nbAbonnement + 1,
+          accesParutions: toutesLesParutions,
+          finAbonnement: getFinAbonnement()
+        }
+      })
+    }
+
+    return res.json({
+      success: true,
+      citoyen: {
+        id: citoyen.id,
+        nom: citoyen.nom,
+        abonne: citoyen.abonne,
+        role: citoyen.nom === 'Harranu' ? 'admin' : 'user'
+      }
+    })
+  }
+
+  // ─── Aucun cas ne correspond ───
+  return res.status(401).json({ error: 'Identifiants incorrects.' })
 })
+
+function getFinAbonnement() {
+  const now = new Date()
+
+  // Dernier jour du mois suivant
+  return new Date(
+    now.getFullYear(),
+    now.getMonth() + 2, // mois suivant
+    0,                  // jour 0 = dernier jour du mois précédent
+    23, 59, 59, 999
+  )
+}
 
 // ─── PUBLICATIONS GRATUITES ───────────────────────────────────────────────────
 app.get('/api/free_access', (req, res) => {
@@ -76,7 +165,7 @@ app.get('/api/free_access', (req, res) => {
 app.get('/api/private_access', async (req, res) => {
   const nom = req.query.nom
 
-  const citoyen = await prisma.citoyen.findUnique({ where: { nom } })
+  const citoyen = await prisma.citoyen.findFirst({ where: { nom } })
 
   if (!citoyen) {
     return res.status(403).json({ error: 'Accès refusé.' })

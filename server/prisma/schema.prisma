@@ -9,7 +9,7 @@ datasource db {
 
 model Citoyen {
   id             Int       @id @default(autoincrement())
-  nom            String    @unique
+  nom            String
   password       String
   abonne         Boolean   @default(false)
   PremierAbonnement DateTime?

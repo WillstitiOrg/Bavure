@@ -53,7 +53,7 @@ export default function PanelAdmin() {
   const [citoyens, setCitoyens] = useState<Citoyen[]>([])
   const [editId, setEditId] = useState<number | null>(null)
   const [editData, setEditData] = useState<Partial<Citoyen>>({})
-  const [newCitoyen, setNewCitoyen] = useState({ nom: '', password: randomPassword() })
+  const [newCitoyen, setNewCitoyen] = useState({ nom: 'Default', password: randomPassword() })
   const [message, setMessage] = useState("")
   const [parutionsDisponibles, setParutionsDisponibles] = useState<number[]>([])
   const [groupesPrivate, setGroupesPrivate] = useState<GroupeFichier[]>([])
@@ -95,7 +95,7 @@ export default function PanelAdmin() {
       body: JSON.stringify(newCitoyen)
     })
     if (res.ok) {
-      setNewCitoyen({ nom: '', password: randomPassword() })
+      setNewCitoyen({ nom: 'Default', password: randomPassword() })
       load()
       flash("Citoyen créé.")
     } else {
