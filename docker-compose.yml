@@ -5,12 +5,13 @@ services:
       dockerfile: client/Dockerfile
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
       - "traefik.http.routers.labavure.rule=Host(`labavure.lobots.fr`)"
       - "traefik.http.routers.labavure.entrypoints=websecure"
-      - "traefik.http.routers.labavure.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.labavure.tls.certresolver=le"
       - "traefik.http.services.labavure.loadbalancer.server.port=80"
     networks:
-      - web
+      - proxy
     volumes:
       - ./uploads:/uploads
     depends_on:
@@ -22,16 +23,17 @@ services:
       dockerfile: server/Dockerfile
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
       - "traefik.http.routers.labavure-api.rule=Host(`labavure.lobots.fr`) && PathPrefix(`/api`)"
       - "traefik.http.routers.labavure-api.entrypoints=websecure"
-      - "traefik.http.routers.labavure-api.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.labavure-api.tls.certresolver=le"
       - "traefik.http.services.labavure-api.loadbalancer.server.port=3001"
     environment:
       DATABASE_URL: ${DATABASE_URL}
     volumes:
       - ./uploads:/uploads
     networks:
-      - web
+      - proxy
     depends_on:
       - postgres
 
@@ -44,11 +46,12 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
-      - web
+      - proxy
 
 volumes:
   pgdata:
 
+# Reseau partage, gere par le projet Traefik central (docker network create proxy)
 networks:
-  web:
+  proxy:
     external: true
