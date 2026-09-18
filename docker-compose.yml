@@ -1,8 +1,7 @@
 services:
   client:
-    build:
-      context: .
-      dockerfile: client/Dockerfile
+    image: ghcr.io/willstitiorg/bavure-client:latest
+    pull_policy: always
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -18,9 +17,8 @@ services:
       - server
 
   server:
-    build:
-      context: .
-      dockerfile: server/Dockerfile
+    image: ghcr.io/willstitiorg/bavure-server:latest
+    pull_policy: always
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
