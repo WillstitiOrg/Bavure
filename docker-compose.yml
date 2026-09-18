@@ -3,6 +3,7 @@ services:
     image: ghcr.io/willstitiorg/bavure-client:latest
     pull_policy: always
     labels:
+      - "com.centurylinklabs.watchtower.enable=true"
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
       - "traefik.http.routers.labavure.rule=Host(`labavure.lobots.fr`)"
@@ -20,6 +21,7 @@ services:
     image: ghcr.io/willstitiorg/bavure-server:latest
     pull_policy: always
     labels:
+      - "com.centurylinklabs.watchtower.enable=true"
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
       - "traefik.http.routers.labavure-api.rule=Host(`labavure.lobots.fr`) && PathPrefix(`/api`)"
