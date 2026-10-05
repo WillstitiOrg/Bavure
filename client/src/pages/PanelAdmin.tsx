@@ -80,7 +80,7 @@ export default function PanelAdmin() {
     if (citoyen.role !== "admin") navigate("/")
     load()
     loadFiles()
-  }, [])
+  }, [navigate])
 
   const flash = (msg: string) => {
     setMessage(msg)

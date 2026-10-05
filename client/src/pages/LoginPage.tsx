@@ -37,7 +37,7 @@ const API = import.meta.env.VITE_API_URL || "http://localhost:3001"
         navigate("/newspapers")
       }
 
-    } catch (err) {
+    } catch {
       setError("Impossible de contacter le serveur.");
     }
   };
