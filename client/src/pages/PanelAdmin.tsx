@@ -21,7 +21,7 @@ type GroupeFichier = {
   files: string[]
 }
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:3001"
+const API = import.meta.env.VITE_API_URL || ""
 
 const randomPassword = () => {
   const chars = 'abcdefghijklmnopqrstuvwxyz'

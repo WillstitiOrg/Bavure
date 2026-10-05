@@ -9,7 +9,7 @@ export default function LoginPage() {
   const [mdp, setMdp] = useState("");
   const [error, setError] = useState("");
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:3001"
+const API = import.meta.env.VITE_API_URL || ""
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

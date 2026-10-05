@@ -8,7 +8,7 @@ type Bavure = {
   imgs: string[]
 }
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:3001"
+const API = import.meta.env.VITE_API_URL || ""
 
 export default function NewsPaper() {
   const [bavures, setBavures] = useState<Bavure[]>([])
